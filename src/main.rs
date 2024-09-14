@@ -2,6 +2,8 @@
 
 use std::collections::hash_map::Values;
 use std::fmt::format;
+
+
 mod fiveth;
 
 mod models{
@@ -1434,4 +1436,1258 @@ fn test_module_file_super() {
     // how to access nested module using `super`
     crate::third::second::third::say_hello();
 }
+
+
+// Trait
+// Trait adalah definisi fungsional untuk tipe data lain
+// Biasanya Trait digunakan untuk dasar implementasi beberapa tipe data
+// Di bahasa pemrogramana lain seperti Java atau Golang, Trait mirip seperti Interface
+// Trait berisi definisi method tanpa implementasi konkrit
+// Untuk membuat Trait, kita bisa menggunakan kata kunci `trait`, diikuti dengan Trait nya
+trait CanSayHello{
+    fn say_Hello_Trait(&self)-> String;
+    fn say_Hello_Trait_to(&self, name: &str)->String;
+}
+
+// Implementasi Trait
+// Trait bisa digunakan sebagai tipe data, namun tetap perlu ada implementasi konkritnya, misal mengguanakan Struct atau Enum
+// Untuk implementasi Trait, kita bisa gunakan:
+// impl NamaTrait for NamaType{
+//      isi method
+// }
+impl CanSayHello for Person{
+    fn say_Hello_Trait(&self) -> String {
+        format!("Hello im is {}", self.first_name)
+    }
+    fn say_Hello_Trait_to(&self, name: &str) -> String {
+        format!("Hello, {} my name is {}", name, self.first_name)
+    }
+}
+
+// Menggunakan Trait
+// Trait tidak bisa dibuat instance-nya
+// Untuk membuat instance dengan Tipe data Trait, maka kita harus gunakan implementasinya
+#[test]
+fn test_trait() {
+    let person:Person=Person{
+        first_name:String::from("Yogi"),
+        middle_name:String::from("Ogiy"),
+        last_name:String::from("Dwitama"),
+        age:20
+    };
+
+    let result =person.say_Hello_Trait_to("Roger");
+    println!("{}", result);
+}
+
+
+// Default Implementasi
+// Sebelumnya kita hanya membuatmethod di Trait tanpa implementasi konkritnya
+// Trait sebenarnya bisa juga digunakan untuk membuat Method dengan implementasi konkrit, atau kita sebut dengan Default implementation
+// Secara otomatis Type yang nanti kita lakukan implementasi, akan mendapatkan default implementastion dari methdo tersebut
+trait CanSayHelloDefault{
+    fn hello(&self)->String{
+        String::from("Hello")
+
+    }
+    fn say_Hello_Trait_default(&self)-> String;
+    fn say_Hello_Trait_to_default(&self, name: &str)->String;
+}
+
+impl CanSayHelloDefault for Person{
+    fn say_Hello_Trait_default(&self) -> String {
+        format!("Hello im is {}", self.first_name)
+    }
+    fn say_Hello_Trait_to_default(&self, name: &str) -> String {
+        format!("Hello, {} my name is {}", name, self.first_name)
+    }
+}
+
+#[test]
+fn test_trait_default() {
+    let person:Person=Person{
+        first_name:String::from("Yogi"),
+        middle_name:String::from("Ogiy"),
+        last_name:String::from("Dwitama"),
+        age:20
+    };
+
+    let result =person.say_Hello_Trait_to_default("Roger");
+    println!("{}", result);
+    let result =person.hello();
+    println!("{}", result);
+}
+
+
+// Trait sebagai Parameter
+// Salah satu keuntungan mengggunakan Trait adalah ketika kita gunakan Trait sebagai parameter
+// Saat gunakan Trait sebagai parameter, maka kita bisa gunakan value apapun yang merupakan implemntasi dari Trait tersebut sebagai value untuk parameternya
+// Untuk menggunakan Trait  sebagai paramter, kita bisa gunakan  kata kunci impl NamaTrait pada parameternya
+// Jika kita ingin tipe data reference, kita bisa gunakan  &impl NamataTrait pada parameter nya
+// Jika kita ingin tipe data reference, kita bisa gunakan  `&impl NamaTrait`
+
+fn say_hello_trait_parameter(person: &impl CanSayHelloDefault){
+    println!("{}", person.say_Hello_Trait_default())
+}
+
+#[test]
+fn test_trait_parameter() {
+    let person:Person=Person{
+        first_name:String::from("Yogi"),
+        middle_name:String::from("Ogiy"),
+        last_name:String::from("Dwitama"),
+        age:20
+    };
+
+    say_hello_trait_parameter(&person);
+
+    let result =person.say_Hello_Trait_to_default("Roger");
+    println!("{}", result);
+    let result =person.hello();
+    println!("{}", result);
+}
+
+// Multiple Trait
+// Typ itu bisa mengimplementasikan lebih dari satu Trait
+// Oleh karena itu, saat kita membuat parameter juga,kita bisa buat satu parameter untuk beberapa tipe Trait
+// Kita bisa gunakan tanda `+ (plus)` jika ingin membuat paramter dengan tipe Multiple Trait, misal (impl Trait1 + Trait2 +Trait3)
+trait CanSayGoodByeMultipleTrait{
+    fn good_bye(&self)-> String;
+    fn good_bye_to(&self, name:&str)->String;
+
+}
+
+impl CanSayGoodByeMultipleTrait for Person{
+    fn good_bye(&self) -> String {
+        format!("Good bye, my name is {}", self.first_name)
+    }
+    fn good_bye_to(&self, name: &str) -> String {
+        format!("Good bye, {} my name is {}", name, self.first_name)
+    }
+
+}
+
+fn hello_and_goodbye(value: &(impl CanSayHello + CanSayGoodByeMultipleTrait)){
+    println!("{}", value. say_Hello_Trait());
+    println!("{}", value.good_bye());
+}
+
+#[test]
+fn test_trait_parameter_multiple_trait() {
+    let person:Person=Person{
+        first_name:String::from("Yogi"),
+        middle_name:String::from("Ogiy"),
+        last_name:String::from("Dwitama"),
+        age:20
+    };
+
+    say_hello_trait_parameter(&person);
+
+    let result =person.say_Hello_Trait_to_default("Roger");
+    println!("{}", result);
+    let result =person.hello();
+    println!("{}", result);
+
+    println!("{}", person.good_bye());
+    println!("{}", person.good_bye_to("Cia"));
+
+    hello_and_goodbye(&person);
+}
+
+// Return Trait
+// Selain untuk Paramter, Trait juga bisa digunakan sebagai Return Value di function
+// Namun seperti yang dijelaskan di awal, karena Trait tidak bisa dibuat instance-nya secara langsung, maka value yang kita kembalikan juga harus dalam bentuk implementasi Type nya
+// Untuk membuat Trait sebagai return value, kita perlu sebutakn seprti Paramater, yaitu impl NamaTrait nya
+struct SimplePerson{
+    name:String
+}
+
+impl CanSayGoodByeMultipleTrait for SimplePerson{
+    fn good_bye(&self) -> String {
+        format!("Good bye, my name is {}", self.name)
+    }
+    fn good_bye_to(&self, name: &str) -> String {
+        format!("Good bye, {} my name is {}", name, self.name)
+    }
+
+}
+fn create_person(name:String)-> impl CanSayGoodByeMultipleTrait{
+    SimplePerson{name} //return value
+}
+
+#[test]
+fn test_return_trait() {
+    let person=create_person(String::from("Yogi"));
+    println!("{}", person.good_bye());
+    println!("{}", person.good_bye_to("Yogi"));
+}
+
+// Conflict Method Name
+// Salah satu problem ketika menggunakan beberapa `Trait` adalah, kadang nama method di Trait bentrok atau konflik dengan method di Trait lainnya
+// Atau bahkan bisa bentrokd engan method di Type nya sendiri
+// Contoh sebelumnya, kita membuta method say_hello() di Trait CansayHello, dan Person juga sudah memiliki method say_hello()
+// Saat kita buat implementasi dari trait, Rust tidak akan menjadikan itu sebagai error, namun masalahnya terjadi ketika kita memanggil method nya
+// Rust akan menjadikan itu error karena methodnya ambigu, Rust akan komplen karena ada beberapa method dengan nama yang sama
+// Cara agar bisa menentukan method yang ingin kita panggil, kita bisa sebutkan Type::nama_methodd(instance)
+#[test]
+fn test_trait_parameter_Conflict_Method() {
+    let person:Person=Person{
+        first_name:String::from("Yogi"),
+        middle_name:String::from("Ogiy"),
+        last_name:String::from("Dwitama"),
+        age:20
+    };
+
+    say_hello_trait_parameter(&person);
+
+    let result =person.say_Hello_Trait_to_default("Roger");
+    println!("{}", result);
+    let result =person.hello();
+    println!("{}", result);
+
+    println!("{}", person.good_bye());
+    println!("{}", person.good_bye_to("Cia"));
+
+    CanSayHelloDefault::say_Hello_Trait_default(&person);
+    Person::say_hello(&person, "RogerD");
+}
+
+// Super Trait
+// Trait bisa digunakan dengan konsep mirip pewarisan, dimana satu Trait bisa memiliki beberapa Trait dibawahnya
+// Trait yang ada diatasnya bisa kita sebut Super Trait
+// Misal kita punya Trait A, lalu kita buat Trait B dan Trait C, Trait A kita jadikan sebagai Super Trait dari Trait B dan Trait C.
+// Aritnya sekaranag jika kita implementasi Trait B atau Trait C, secara otomatis kita harus implementasi juga Trait A
+// Trait boleh memiliki lebih dari satu Super Trait, caranya kita bisa gunakan tanda  `+ (plus)`
+
+impl CanSayHelloDefault for SimplePerson{
+    fn say_Hello_Trait_default(&self) -> String {
+        format!("Hello im is {}", self.name)
+    }
+    fn say_Hello_Trait_to_default(&self, name: &str) -> String {
+        format!("Hello, {} my name is {}", name, self.name)
+    }
+}
+trait CanSay: CanSayHelloDefault +CanSayGoodByeMultipleTrait{
+    fn say(&self){
+        println!("{}", self.say_Hello_Trait_default());
+        println!("{}",self.good_bye_to("hehehe"));
+    }
+}
+
+impl CanSay for SimplePerson {
+
+}
+
+// Generic
+// Generic merupakan fitur dimana kita bisa membuat function, struct, enum, mtehod, dan trait yang tipe datanya bisa diubah ketika digunakan
+// Fitur ini sangat berguna ketika memang kita ingin membuat sebuah kode yang generic/ general untuk berbagai tipe data, sehingga kita tidak perlu tentukan dari awal tipe data yang ingin kita gunakan
+// Kita akan coba fitur generic ini di berbagai lokasi yang bisa dilakukan di rust
+
+// Generic di Struct
+// Ketika membuat generic di Struct, kita bisa tambahkan tipe data generic setelah nam Struct menggunakna tanda <> (diamond), dimana didalam tanda diamond tersebut, kita sebutkan nam-nama tipe data genericnya
+// Tipe data generic bisa lebih dari satu, tinggal gunakan, (koma) sebagai pemisah tipe data generic nya
+// Biasanya nama tipe data generic hanya menggunakan satu huruf kapital
+struct Point<T>{
+    x:T,
+    y:T,
+}
+
+#[test]
+fn test_generic_struct() {
+    let integer:Point<i32> = Point::<i32>{x:5, y:10};
+    let float: Point<f64>= Point::<f64>{x:1.0, y:4.0};
+
+    println!("integer x: {} y:{}", integer.x, integer.y);
+    println!("float x:{} y:{}", float.x, float.y);
+}
+
+// Generic Enum
+enum Value<T>{
+    NONE,
+    VALUE(T)
+}
+
+#[test]
+fn test_generic_enum() {
+    let value:Value<i32>=Value::<i32>::VALUE(10);
+
+    match value {
+        Value::NONE=>{
+            println!("none")
+        }
+        Value::VALUE(value)=>{
+            println!("value")
+        }
+    }
+
+}
+
+// Generic Type Bound
+// Saat kita membuat generic type, kita bisa memberi batasan type yang diperbolehkan
+// Caranya kita bisa gunakan:(titik dua) diikuti dengan Trait
+// Artinya, genric type yang diperbolehkan hanyalah implementasi dari Trait tersebut
+// Jika ingin menggunakan multiple Trait, seperti biasa kita bisa gunakan +(plus)
+struct Hi<T: CanSayGoodByeMultipleTrait>{
+    value: T,
+}
+
+#[test]
+fn test_generic_struct_with_trait() {
+    let hi =Hi::<SimplePerson>{ //bisa ditambahdengan +CanSayHello
+        value:SimplePerson{
+            name:String::from("Yogi")
+        }
+    };
+    println!("{}", hi.value.good_bye_to("batman"))
+}
+
+// Generic Function
+
+fn min<T:PartialOrd>(value1:T, value2:T)->T{
+    if value1<value2{
+        value1
+    }else{
+        value2
+    }
+}
+
+#[test]
+fn generic_in_function(){
+    let result =min::<i32>(10,20);
+    println!("{}", result);
+
+    let result =min(17,5);
+    println!("{}", result);
+}
+
+// Generic di Method
+// Ketika membuat generic di method, kita bisa tambahkan tiped ata generic setelah kata kunci impl, yang secara otomatis bisa digunakan di semua method
+// Ataua jika hanya khusus untuk method tertentu, kita bisa tambahkan generic type seperti pada function
+impl <T>Point<T>{
+    fn get_x(&self)->&T{
+        &self.x
+    }
+    fn get_y(&self)-> &T{
+        &self.y
+    }
+}
+
+#[test]
+fn test_generic_method() {
+    let point:Point<i32>= Point{x:5, y:10};
+    println!("{}", point.get_x());
+    println!("{}", point.get_y());
+}
+
+// Generic Trait
+// Saat kita membuat Trait, kita juga bisa menambahkan generic type
+// Saat ktia membuat generic type di Trait, secara otomatis kita kan memaksa implementasi Trait tersebut harus menggunakan generic type di implementasi
+trait GetValue<T>{
+    fn get_value(&self)-> &T;
+}
+
+impl <T>GetValue<T> for Point<T> {
+    fn get_value(&self) -> &T {
+        &self.x
+    }
+}
+// Where Clause
+// Sebelumnya saat menggunakan ty[e bound, kita akan menggunakan :(titik dua) diikuti dengan Trait
+// Ada cara yang lain untuk menambahkan type bound, caranya menggunakan kata kunci where
+// Ini akan lebih mudah dibaca ketika type bound sangat banyak
+trait  GetValues<T> where T: PartialOrd{ //bisa ditambakan  hanya dengan `,` koma , X:PartialOrd
+    fn get_value(&self)->&T;
+}
+
+impl <T> GetValues<T> for Point<T> where  T:PartialOrd{
+    fn get_value(&self) -> &T {
+        &self.x
+    }
+}
+
+// Default Generic Type
+// Saat kita menggunakan generic type, kita bisa menambakan default type menggunakan tanda `=` (sama dengan)
+// Artinya jika kita tidak menentukan tipe genericnya, secara otomatis akan menggunakan tipe data tersebut
+struct  PointBlank<T=i32>{
+    x:T,
+    y:T,
+}
+
+#[test]
+fn test_generic_default_value() {
+    let pointlank=PointBlank{x:10, y:20};
+    println!("x:{}, y:{}", pointlank.x, pointlank.y);
+    let pointlank=PointBlank::<f32>{x:10.5, y:20.5};
+    println!("x:{}, y:{}", pointlank.x, pointlank.y);
+}
+// Overloadable
+// Sebelumnya kita pernah belajar operator matematika untuk tipe data number
+// Apakah tipe data selain number mendukung operator matematika seperti `+`, `-`, dan lainnya
+// Secara default tidak, namun Rust memiliki fitur dimana kita bisa mengimplementasikan oprator dalam bentuk method, sehingga bisa menggunakan operator matematika
+// Semua operator direprensentasikan dalam bentuk Trait yang bisa kita implementasikan
+// Semua Traitnya berada di Module/ Crate core::ops
+// https://doc.rust-lang.org/core/ops/index.html
+
+use core::ops::Add;
+use std::cmp::Ordering;
+use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet, LinkedList, VecDeque};
+
+//usually on the top
+struct Apple{
+    quantity:i32,
+}
+
+// INI AKAN ERROR
+
+impl Add for Apple{
+    type Output = Apple;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        Apple{
+            quantity:self.quantity + rhs.quantity
+        }
+    }
+}
+
+#[test]
+fn test_operator_add() {
+    let apple1= Apple{quantity:10};
+    let apple2= Apple{quantity:10};
+
+   let apple23= apple1+apple2;
+    println!("{}", apple23.quantity);
+}
+// Optional Value
+// Null atau Undefined
+// Jika sebelumnya kita pernah belajar bahasa pemrograman sepertiu java, JavaScript atau Undefined
+// Yaitu nilai kosong(tidak ada) pada variable
+// Rust tidak mengenal hal itu, saat membuat variable maka kita wajib mengisi value pada variable tersebut, akan aman karena sudah dipastikan bahwa variable tersebut berisi data
+// Lantas bagaiaman jika kita ingin membuat variable yang memang datanya tidak wajib kita isi? Maka kita bisa menggunakan Option Enum
+
+// Rust menyediakan Optional Enum, yang merupakan reperesentasi dari optional value (value yang tidak wajib diisi)
+// Sederhananya, Option Enum menyediakan dua opsi, None untuk opsi nilai kosong, dan some(T) untuk opsi value tidak kosong
+// Kelebihannya menggunakan Enum adalah, kita bisa menggunakan Pattern Matching ketika melakukan pengecekan nilai pada Enum Option tersebut
+// Enum Option terdapat terdapat di Module/ Create core ::option
+// https://doc.rust-lang.org/stable/core/option/
+
+fn double(x:Option<i32>)-> Option<i32>{
+    match x{
+        None=>None,
+        Some(i)=>Some(i*2),
+    }
+}
+
+#[test]
+fn test_optional_values() {
+    let result =double(Some(3));
+    println!("{:?}", result);
+
+    let result =double(None);
+    println!("{:?}", result);
+}
+
+// Comparing
+// Selain operator matematika, di Rust juga juga bisa digunakan untuk pembuatan operator perbandingan menggunakan Module/Crate core:cmp
+// https://doc.rust-lang.org/core/cmp/index.html
+// Penggunaanny sama, kita tinggal implementasi Trait yang sesuai dengan operator yang ingin kita buat
+impl PartialEq for Apple{
+    fn eq(&self, other: &Self) -> bool {
+        self.quantity== other.quantity
+    }
+}
+
+impl  PartialOrd for Apple {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.quantity.partial_cmp(&other.quantity)
+    }
+}
+
+// VS
+// Apple Implementation (Manual)
+// impl PartialOrd for Apple{
+//     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+//         if self.quantity<other.quantity{
+//             Some(Ordering::Less)
+//         }else if self.quantity> other.quantity{
+//             Some(Ordering::Greater)
+//         }else {
+//             Some(Ordering::Equal)
+//         }
+//     }
+// }
+
+#[test]
+fn test_comparing() {
+    let apple1= Apple{quantity:10};
+    let apple2= Apple{quantity:20};
+
+    println!("Apple 1 == Apple 2: {}", apple1==apple2);
+    println!("Apple 1 < Apple 2: {}", apple1 < apple2);
+    println!("Apple 1 > Apple 2 :{}", apple1>apple2)
+}
+
+// String Manipulation
+// https://doc.rust-lang.org/std/string/struct.String.html#
+#[test]
+pub fn test_string_manipulation () {
+    let s =String::from("Yogi Dwitama Uchiha");
+
+    println!("{}", s.to_ascii_uppercase());
+    println!("{}", s.to_uppercase());
+    println!("{}", s.len());
+    println!("{}", s.replace("Yogi", "Allicio"));
+    println!("{}", s.contains("Yogi"));
+    println!("{}", s.starts_with("Yogi"));
+    println!("{}", s.trim());
+    println!("{:?}",&s[0..3]);
+    println!("{:?}", s.get(0..5));
+}
+
+// Formatting
+// Sebelumnya kita asering menggunakan `println!`
+// `println!` adalah macro, bukan function
+// Saat menggunakan macro println!, kita sering menambahkan parameter tambahan untuk menampilkan data
+//  secara default, data tidak bisa ditampilkan dalam macro `println!`, yang bisa ditampilkan hanyalah data yang sudah implementasi Module core:fmt
+// https://doc.rust-lang.org/std/fmt/
+#[test]
+fn test_format() {
+    let person = SimplePerson{
+        name:String::from("Yogi")
+    };
+
+    // println!("{:?}", person);
+}
+
+// Display vs Debug
+// Saat kita menggunakan formatiing, kita sering menggunakan  `{}` (Display), atau `{:?}` (Debug), Pertanyaannya, lebih baik pilih yang mana ?
+// Sebenernya kalo diperhatikan, kebanyakan tipe data yang primitive menggunakan Display, sedangkan tipe data kompleks sperti Array, Slice itu banyak menggunakan Debug
+// Tapi sebenarnya kita juga bisa implementasi Display dan Debug secara bersamaan.
+struct Category{
+    id:String,
+    name:String
+}
+
+use std::fmt::{Debug, Formatter};
+use std::io::read_to_string;
+use std::ops::Deref;
+use std::panic::Location;
+use log::error;
+
+impl Debug for Category{
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Category")
+            .field("id", &self.id)
+            .field("name", &self.name)
+            .field("author",&"yogs")
+            .finish()
+    }
+}
+
+#[test]
+fn test_formatter_impl() {
+    let catergory= Category{
+        name:String::from("Gatget"),
+        id:String::from("gatget")
+    };
+
+    println!("{:?}", catergory)
+}
+
+// Closure
+// Closure adalah function tanpa nama yang biasanya disimpan ddi variable atau digunakan di parameter atau bis disebut anonymous function
+// Kita bisa membuat Closure dan memanggil Closure ketika membutuhkannya
+// Untuk membuat Closure, kita bisa gunakan tipe data `fn(paramType)->returnType`
+// Dan untuk memanggil Closure, kita bisa panggil menggunakan nama variable atau paramternya secara langsung
+#[test]
+fn test_closure() {
+    let sum:fn(i32, i32)-> i32 =|value1:i32, value2:i32|->i32{
+        value1+value2
+    };
+    let result =sum(2,8);
+    println!("{}", result);
+}
+
+// Closure sebagai parameter
+fn print_with_filter(value:String, filter:fn(String)-> String){
+    let result =filter(value);
+    println!("Result :{}", result);
+}
+
+#[test]
+fn test_closure_as_aparameter() {
+    let name = String::from("Yogi Dwitama");
+    print_with_filter(name, |value:String| -> String{value.to_uppercase()});
+}
+
+// Closure dari function
+fn to_uppercase(value:String)->String{
+    value.to_uppercase()
+}
+
+#[test]
+fn test_print_to_upper() {
+    let name=String::from("Dwitama");
+    print_with_filter(name, to_uppercase);
+}
+
+// Closure Scope
+#[test]
+fn test_closure_Scope() {
+    let mut counter =0;
+
+    let mut increment =||{
+        counter +=1;
+        println!("Incremennt")
+    };
+
+    increment();
+    increment();
+    increment();
+
+    println!("Counter :{}", counter)
+}
+
+// Alternative
+struct  Counter{
+    counter:i32,
+}
+
+impl Counter{
+    fn icnrement(&mut self){
+        self.counter +=1;
+        println!("Increment")
+    }
+}
+
+#[test]
+fn test_print_closure_scope_with_struct() {
+    let mut counter= Counter{counter:0};
+    counter.icnrement();
+    counter.icnrement();
+    counter.icnrement();
+
+    println!("Counter :{}", counter.counter)
+}
+
+// Sequence
+// Sequence adalah tipe data Collection mirip seperti array, memiliki index
+// Rust menyediakan beberapa tipe data Sequence, dan bisa digunakan sesuai kebutuhan kita,
+// Vec(Vector)
+// VecDeque
+// LinkedList
+
+// Vector
+// Vector merupakan sequence yang urutannya sesuai dengan yang kita inginkan
+// Menambahkan data ke Vector dilakukan dibagian belakang
+// Cocok untuk implementasi Stact(tumpukan), Lasar In First Out
+// https://doc.rust-lang.org/std/vec/struct.Vec.html
+#[test]
+fn test_vector() {
+    let mut names: Vec<String>= Vec::<String>::new();
+    names.push(String::from("Yogi"));
+    names.push(String::from("Dwitama"));
+    names.push(String::from("Uchiha"));
+
+    for nama in &names{ // gunakan `&` pointer
+        println!("{}", nama)
+    }
+
+    println!("{}", names[0]);
+
+//     Bandingkan dengan Array yang disimpan dalam `Stack`
+    let arrayPrim=["Yogi", "Dwitama", "Uchiha"];
+    for value in arrayPrim{
+        println!("{}", value)
+    };
+
+
+//     kemudian kita panggil lagi functionnya, maka functionnya masih bisa digunakan
+    println!("{:?}", arrayPrim)
+}
+
+// VecDeque
+// VecDeque sebenarnya mirip seperti Vector
+// Yang membedakan adalah dia memiliki kemampuan menambahkan data di depan(head) dan dibelakang(end)
+// Sehingga VecDeque juga cocok digunakan untuk implementasi Queue(Antrian), First In First Out
+// https://doc.rust-lang.org/std/collections/struct.VecDeque.html
+#[test]
+fn test_vec_deque() {
+    let mut names: VecDeque<String>=VecDeque::new();
+    names.push_back(String::from("Yogi"));
+    names.push_back(String::from("Dwitama"));
+    names.push_front(String::from("Uchiha"));
+    for name in &names{
+        println!("{}", name)
+    }
+    // Sifatnya sama seperti array
+    println!("{}", names[0]);
+}
+
+// LinkedList
+// LinkedList merupakan implementasi Sequence menggunakan struktur data Linked List
+// Struktur data LinkedList sangat efisien untuk menambahkan dan pengurangan data, oleh karena itu sangat cocok ketikakita butuh Sequence yang tidak terprediksi ukurannya
+// Namun perlu diperhatikan, performa Linked List tidak sebaik Vector ketiak mengakses data megnggunakan index, oleh karena itu Linked List tidak memiliki fitur untuk mengakses data menggunakan index
+// https://doc.rust-lang.org/std/collections/struct.LinkedList.html
+#[test]
+fn test_LinkedList() {
+    let mut names: LinkedList<String>=LinkedList::<String>::new();
+    names.push_back(String::from("Yogi"));
+    names.push_back(String::from("Dwitama"));
+    names.push_front(String::from("Uchiha"));
+    for name in &names{
+        println!("{}", name)
+    }
+    // Sifatnya tidak sama seperti array
+    // println!("{}", names[0]);
+}
+
+// HashMap dan BTreeMap
+// Rust memiliki dua implementasi Map, yaitu HashMap dan urutan BTreeMap
+// Perbedaan yang mencolok adalah pada BTreeMap, key akan diurutkan
+// Dan karena pada HashMap tidak akan diurutkan, oleh karena itu operasi untuk memasukann data di HashMap lebih cepat dibandingkan BTreeMap, namun urutan key tidak bisa dijamin urutannya sama sekali
+// https://doc.rust-lang.org/std/collections/struct.HashMap.html
+// https://doc.rust-lang.org/std/collections/btree_map/index.html
+
+// HashMap
+#[test]
+fn test_hash_map() {
+    let mut map: HashMap<String, String>=HashMap::new();
+    map.insert(String::from("name"), String::from("Yogi"));
+    map.insert(String::from("age"), String::from("25"));
+
+    let name=map.get("name");
+    let age= map.get("age");
+
+    println!("Name: {}, age:{}", name.unwrap(), age.unwrap())
+}
+
+// BTreeMap
+#[test]
+fn test_btree_map() {
+    let mut map: BTreeMap<String, String>= BTreeMap::new();
+    map.insert(String::from("name"), String::from("Yogi"));
+    map.insert(String::from("age"), String::from("34"));
+    map.insert(String::from("country"), String::from("Ausi"));
+
+    for entry in map{
+        println!("{}:{}", entry.0, entry.1 );
+    }
+}
+
+// Set
+// `Set` merupakan tipe data collection dimana data didalam Set tidak boelh duplikat (tidak boleh sama)
+// Jika kita memsukan data ke dalam `Set` dengan data yang sudah ada didalam  `Set`, secara otomatis data tidak akan diterima
+// `Set` tidak sperti Sequence,data di `Set` tidak bisa diakases menggunakan index tapi menggunakan perulangan(loop)
+
+// HashSet dan BTreeSet
+// Sama seperti Map, Set memiliki dua implementai di Rust, yaitu HashSet dan BTreeSet
+// HashSet tidak menjamin urutan data, karena tujuan HashSet adalah memastiakn tidak ada data duplikat secara cepat
+// BTeeSet selain memastikan tidak ada data duplikat, juga mengurutkan data di dalam Set, oleh karena itu performanya lebih lambat dari HashSet karena perlu mengurutkan data setiap kita menambahkan data ke BTreeSet
+// https://doc.rust-lang.org/std/collections/struct.HashSet.html
+// https://doc.rust-lang.org/std/collections/struct.BTreeSet.html
+
+// HashSet
+#[test]
+fn test_hash_set() {
+    let mut set : HashSet<String>=HashSet::new();
+    set.insert(String::from("Yogi"));
+    set.insert(String::from("Yogi"));
+    set.insert(String::from("Dwitama"));
+    set.insert(String::from("Dwitama"));
+    set.insert(String::from("Uchiha"));
+    set.insert(String::from("Uchiha"));
+    for setsat in set{
+        println!("{}", setsat)
+    }
+}
+// BtreeSet
+#[test]
+fn test_btree_set() {
+    let mut set : BTreeSet<String>=BTreeSet::new();
+    set.insert(String::from("Yogi"));
+    set.insert(String::from("Yogi"));
+    set.insert(String::from("Dwitama"));
+    set.insert(String::from("Dwitama"));
+    set.insert(String::from("Uchiha"));
+    set.insert(String::from("Uchiha"));
+    for setsat in set{
+        println!("{}", setsat)
+    }
+}
+
+// Iterator
+// Rust memiliki medoule Iterator, yang digunakan sebagai mekanisme untuk melakukan operasi terhadap ururtan dari data
+// Semua tipe data yang multiple seperti Array, Slice dan Collection memiliki fitur Iterator
+// Dengan menggunakan Iterator, secara otomatis kita bisa melakukan iterasi data menggunakan For Loop terhadap value tersebut
+// https://doc.rust-lang.org/std/iter/trait.Iterator.html
+#[test]
+fn test_btree_set_into_iter() {
+    let mut set : BTreeSet<String>=BTreeSet::new();
+    set.insert(String::from("Yogi"));
+    set.insert(String::from("Yogi"));
+    set.insert(String::from("Dwitama"));
+    set.insert(String::from("Dwitama"));
+    set.insert(String::from("Uchiha"));
+    set.insert(String::from("Uchiha"));
+    for setsat in set.into_iter(){ //tidak harus eksplisit `.into_iter`
+        println!("{}", setsat)
+    }
+}
+
+#[test]
+fn test_terator() {
+    let array:[i32;5]=[1,2,3,4,5];
+    let mut iterator= array.iter();
+
+    while let Some (value)= iterator.next(){
+        println!("{}", value);
+
+    }
+
+    for value in iterator{
+        println!("{}", value)
+    }
+}
+
+// Iterator Method
+#[test]
+fn test_iterator_method() {
+    let vector:Vec<i32>= vec![1,2,3,4,5,6,7,8,9,10,202];
+    println!("Vector:{:?}", vector);
+    let sum:i32= vector.iter().sum();
+    println!("Sum:{}", sum);
+    let count:usize=vector.iter().count();
+    println!("Count:{}", count);
+    let doubled:Vec<i32>=vector.iter().map(|x| x*2).collect();
+    println!("Doubled:{:?}", doubled);
+    let odd: Vec<&i32>=vector.iter().filter(|x| *x % 2 !=0).collect();
+    println!("Odd:{:?}", odd)
+}
+
+// Error Handling
+// Rust membagi error menjadi dua jenis recoverable( dapat dipulihkan) dan unrecoverable(tidak dapat dipulihkan)
+// Rust tidak punya data Exception, seperti Java, PHP, JavaScript
+// Rust menggunakan pedakatan lain untuk Error Handling
+
+// Unrecoverable Error
+// Jika terdapat jenis error yang menurut kita tidak bisa dipulihkan, maka kita bisa jenis Unrecoverable Error
+// Rust menggunakan macro `panic!` untuk melakukan ini
+// Misalnya saat aplikasi yang kita buat perjalan, ternyata tidak ada konfigurasi untuk terkoneksi di database. Tidak ada gunanya mengecek ulang pada kasus ini misalnya, lebih baik matikan aplikasi dan sebutkan error konfigurasi tidak ada. Pada kasus ini, kita bisa gunakan Unrecovarable Error
+// Beberapa hal di Rust juga menggunakan Unrecoverable Error, contoh ketiak mengakses index di array/ vector diluar jangkauan index nya
+
+fn connect_database(host:Option<String>){
+    match host {
+        Some(host)=>{
+            println!("Connect to database at: {}", host);
+        }
+        None=>{
+            panic!("No database host provided")
+        }
+    }
+}
+#[test]
+fn test_uncrecoverable_error() {
+    connect_database(Some(String::from("localhost")));
+    // connect_database(None);
+}
+
+// Recoverable Error
+// Seperti yang dijelaskan diawal, Rust tidak memilki tipe data Exception, Lantas bagaimana untuk jenis Recoverable Error ? Sama seperti Enum `Option`, Rust menyediakan Enum Result untuk ini
+// Jadi ketiak misalnya kita membuta function yang bisa mengemabalikan sukses atau gagal, kita bisa buat function dengan return value Enum Result
+// Enum Result hanya memilki dau nilai, `OK(T)`  dan `Err(E)`
+// https://doc.rust-lang.org/std/result/
+// https://doc.rust-lang.org/std/result/enum.Result.html
+fn connect_cache(host:Option<String>)->Result<String, String>{
+    match host{
+        Some(host)=>Ok(host),
+        None=>Err("No cache host provided".to_string())
+    }
+}
+
+#[test]
+fn test_recoverable_error() {
+    // let cache= connect_cache(None);
+    let cache= connect_cache(Some("Localhost:8090".to_string()));
+    match cache {
+        Ok(host)=>{
+            println!("Connect to cache at {}", host)
+        }
+        Err(error)=>{
+            println!("Error connection to cache {}", error)
+        }
+    }
+}
+
+// `?Operator`
+// Saat menggunakan Recoverable Error, kadang sering memanggil beberapa jenis function yang mengahasilkan `Result`, lalu ingin mengecek, jika Errmaka kita ingin langsung mengambalikan error itu secara langsung
+// Jika melakukan manual menggunakan Pattern Matching, kadang menyulitkan
+//  Kita bisa menggunakan `? Opertaor`, yang secara otomatis bisa mengembalikan `Result` jika memang Err
+
+// Tanpa `?Operator`
+fn connect_email(host:Option<String>)->Result<String, String>{
+    match host{
+        Some(host)=>Ok(host),
+        None=>Err("No connect email".to_string())
+    }
+}
+fn connect_without_application(host:Option<String>)->Result<String, String>{
+    // cek untuk cache result
+    let cache_result= connect_cache(host.clone());
+    match cache_result {
+        Ok(_)=>{}
+        Err(err)=>{
+            return Err(err)
+        }
+    }
+    // cek untuk cache email
+    let email_result= connect_email(host.clone());
+    match email_result {
+        Ok(_)=>{}
+        Err(err)=>{
+            return Err(err)
+        }
+    }
+    Ok("Connected aplication".to_string())
+}
+
+// Using `?Operator`
+fn connect_application(host:Option<String>)->Result<String, String>{
+    connect_cache(host.clone())?;
+    connect_email(host.clone())?;
+    Ok("Connected to application". to_string())
+}
+
+#[test]
+fn test_application_error_operator_question() {
+    let result = connect_application(None);
+    match result {
+        Ok(host)=>{println!("Success connect with message :{}", host)}
+        Err(err)=>{println!("Erro with message:{}", err)}
+    }
+}
+
+// Lifetime
+// Di materi ownership dan reference, kita sudah tau bahwa tiap data/ reference memiliki lifetime (alur hidup) yang sudah ditentukan
+// Secara default, lifetime di rust sudah ditentukan mengikuti scope variable, sehingga aman dan Rust juga melakukan borrow check pda saat melakukan kompilasi untuk memastikan tidak ada Dangling Reference.
+#[test]
+fn test_dangling_reference() {
+    let r:&i32;
+    {
+        let x=5;
+        // r=&x; //will error "x does not live long enough"(Dangling Reference) because r borrowed in this scope
+    }
+    r=&40;
+    println!("{}", r)
+}
+
+// Lifetime di Function
+// Salah satu yang membingungkan lainnya adalah ketika kita mengguanakan reference sebagai parameter, seklaigus sebagai return value
+// Misal kita akan membuat function dengan dua parameter reference, lalu kita bandingkan dana mengambalikan salah satu paramter reference sebagai return value
+// Pada kasus ini, Rust akan bingung karena harus melakukan borrow parameter pertama atau parameter kedua, karena kondisinya bisa berbeda
+
+// fn longest(value1: &str, value2:&str)-> &str{ //`-> &str` error `missing lifetime` rust will be confused because this function don't know which one to borrowed
+//     if value1.len()>value2.len(){
+//         value1
+//     }else{
+//         value2
+//     }
+// }
+
+// Lifetime Annotation Syntax
+// Pada kasus Lifetime di Parameter sebelumnya, Rust menyediakan fitur bernama Lifetime Annotation, dimana kita bisa menyebutkan yang mana kemungkinan akan di borrow
+// Cara menambahkan Lifetime Annotation sama seperti Generic, hanya saja Typenya diawali dengan `'`(petik satu)
+// Selanjutnya pada variable yang kita ingin tandai Lifetime Annotation Type, kita bisa tambahkan juga sbelum Type aslinya
+
+// This code will fix upper code `missing lifetime`
+fn longest<'a>(value1:&'a str, value2:&'a str)-> &'a str{
+    if value1.len()> value2.len(){
+        value1
+    }else {
+        value2
+    }
+}
+
+#[test]
+fn test_longest_lifetime_annotation() {
+    let value1="Yogi";
+    let value2= "Dwitama";
+    let result=longest(value1, value2);
+    println!("The longest is:{}", result)
+}
+
+// Lifetime Annotation tidak Mengubah Waktu Hidup
+// Lifetime Annotation tidak akan mengubah waktu alur hidup, hanya penanda untuk membantu `Rust Borrow Checker`
+// Oleh karena itu pada kasus jika ternyata alur hidup variable sudah selesai, maka bisa aja terjadi error seperti diawal, yaitu Dangling Reference
+// Example
+#[test]
+fn test_lifetime_annotation_dangling_reference() {
+    let string1= String::from("Eko");
+    let result;
+    let string2= String::from("Dwitama");
+    {
+        // let string2= String::from("Dwitama"); //borrowed value does not live long enough
+        result=longest(string1.as_str(), string2.as_str());
+    }
+
+    println!("The longest string is: {}", result)
+}
+
+// Lifetime Annotation di Struct
+// Lifetime Annotation mirip seperti Generic, kita bisa gunakan juga diStruct
+// Dengan menggunakan Lifetime Annotation di Struct, kita bsai menandai field dengan tipe Reference
+// Dengan begitu, kita bisa menggunakan Lifetime Annotation ketiak nanti menggunakan Struct tersebut
+struct Student<'a, 'b>{
+    name:&'a str,
+    last_name:&'b str
+}
+// #[test]
+// fn test_student() {
+//     let student=Student{
+//         name:"Yogi",
+//         last_name:"Dwitama"
+//     };
+//     println!("{}", student.name)
+// }
+
+fn longest_student_name<'a,'b>(student1:&Student<'a, 'b>, student2:&Student<'a, 'b>)->&'a str {
+    if student1.name.len()>student2.name.len(){
+        student1.name
+    }else {
+        student2.name
+    }
+}
+#[test]
+fn test_longest_student() {
+    let student=Student{
+        name:"Yogi",
+        last_name:"Dwitama"
+    };
+    // println!("{}", student.name);
+    let student2=Student{
+        name:"Naruto",
+        last_name:"Uzumaki"
+    };
+    let result=longest_student_name(&student, &student2);
+    println!("The longest is: {}", result)
+
+}
+
+// Lifetime Annotation di Method
+// Lifetime Annotation selain di Struct dan Function, juga bisa guankan di Method
+// Caranya pun sama seperti membuat Generic Type biasanya
+struct StudentMethod<'a>{
+    name:&'a str
+}
+
+impl <'a> StudentMethod<'a>{
+    fn longest_name(&self, student: &StudentMethod<'a>)-> &'a str{
+        if self.name.len() > student.name.len(){
+            self.name
+        }else { 
+            student.name
+        }
+    }
+}
+
+#[test]
+fn test_lifetime_annotation_method() {
+    let student1=StudentMethod{
+        name:"Yogi"
+    };
+    let student2=StudentMethod{
+        name:"Dwitama"
+    };
+    let result=student1.longest_name(&student2);
+    println!("The longest is: {}", result)
+}
+
+// Lifetime Annotation dan Generic Type
+// Saaat menggunakan Lifetime Annotation, kita bisa gabungkan bersama Generic type
+struct Teacher<'a, ID>
+    where
+        ID:Ord,
+{
+    id:ID,
+    name:&'a str,
+}
+#[test]
+fn test_lifetime_annotation_generic_struct() {
+    let teacher:Teacher<i32>= Teacher{id:1, name:"Yogi"};
+    println!("teacher:{}- {}", teacher.id, teacher.name)
+}
+
+// Attribute
+// Attribute merupakan cara menambahkan metadata(infromasi tambahan) ke code yang kita buat
+// Syntax Attribute di Rust mirip dengan bahasa C# menggunakan tanda  #[NamaAttribute]
+// Di bahasa lain, ada juga yang menyebutnya sebagai Decorator atau Annotation
+// https://doc.rust-lang.org/reference/attributes.html
+
+// Derive Attribute
+// Salah satu Attribute yang sering digunakan adalah Derive Attribute
+// Derive Attribute adalah Attribute yang digunakan untuk membuat implementasi Trait secara otomatis
+// Tidak semua Trait bisa otomatis dibuat implementasinya, hanya yang sudah ditentukan
+// https://doc.rust-lang.org/reference/attributes/derive.html
+#[derive(Debug, PartialEq, PartialOrd)]
+struct Company{
+    name:String,
+    location: String,
+    website: String
+}
+
+#[test]
+fn test_attribute_debug(){
+    let company=Company{
+        name:"Rust".to_string(),
+        location:"USA".to_string(),
+        website:"https://www.rust-lang.org".to_string()
+    };
+    println!("{:?}", company)
+}
+
+// Melihat Hasil Derive
+// Tidak ada hal Magic di Rust, sebenarnya ketika kita gunakan Derive Attribute, ketika proses kompilasi Rust akan membuat kode yang dibutuhkan sebelum dikompilasi
+// Unutk melihat hasil kode yang dibuat , kita bisagunakan cargo-expand
+// https://github.com/dtolnay/cargo-expand
+// Install : cargo install cargo-expand
+// Lalu untuk melihat hasil kode yang dibuat , kita bisa gunakan perintah: cargo expand --tests nama_module
+
+// Smart Pointer
+// Pointer adalah konsep yang umum dimana sebuah variable berisi almat lokasi di memory
+// Di Rust, reference merupakan pointer
+// Smart Pointer adalah tipe data pointer namun memilki metadata(informasi tambahan) dan kemampuan lain selain sebagai penunjuk ke lokasi data
+// Di Rust yang menggunakan konsep ownership (pemilik) dan borrowimg(meminjam), pada kebanyakan kasus, reference hanya meminjam data, sedangkan pointer merpkana pemilik darid ata yang ditunjuk
+
+// `Box<T>` untuk menunjukan data di Heap
+// Menggunakan Box<T>, mengizinkan kita membuat data di Heap sedangkan pointernya disimpan di Stack
+// https://doc.rust-lang.org/std/boxed/struct.Box.html
+
+#[test]
+fn test_box() {
+    let value:Box<i32>=Box::new(10);
+    println!("value : {}", value)
+}
+
+// Recursive Data Type
+// Single data dari Box mungkin terlihat tidak begitu menarik, namun Box akan sangat berguna ketika kita menemui tipe data yang recursive
+// Misal kita punya tipe data Category, dimana di dalamny bisa terdapat Category lagi. kIta sering melihat jenis data seperti ini, contohnya Toko Online
+#[derive(Debug)]
+enum Categories{
+    Of(String, Box<Categories>),
+    End,
+}
+
+#[test]
+fn test_box_enum() {
+    let category =Categories::Of(
+        "Laptop".to_string(),
+        Box::new(Categories::Of("Dell".to_string(), Box::new(Categories::End)))
+    );
+    println!("{:?}", category)
+}
+
+// Dereference
+// Saat kita menggunakan Reference, kadang kita ingin melakukan manipulasi data langsung ke Valuenya
+// Kita bisa melakukan Dereference untuk mengakases langsung Valuenya, bukan lagi Referencenya
+// Untuk melakukan Dereference, kita bisa menggunakan operator `*` (bintang)
+#[test]
+fn test_dereference() {
+    let value1=Box::new(10);
+    let value2=Box::new(20);
+    let result:i32=*value1 * *value2;
+    println!("result:{}", result)
+}
+
+// Deref Trait
+// Saat kita menggunakan Reference atau Box<T>, kita bisa mengguanakn `*` Operator untuk melakukan Dereference
+// Bagaimana jika kita mengguankan tipe data lain? Misal Struct yang kita buat sendiri? Secara default kita tidak bisa mengguankan Dereference
+// Namun jika kita ingin membuat Struct yang kita buat memilki kemampuan Dereference, kita bisa mengguanakn `Deref Trait`
+// https://doc.rust-lang.org/std/ops/trait.Deref.html
+// Khusus Deref Trait Mut kita bisa menggunakan `Deref Trait Mut`
+// https://doc.rust-lang.org/std/ops/trait.DerefMut.html
+struct MyValue<T>{
+    value:T
+}
+
+impl <T> Deref for MyValue<T> {
+    type Target = T;
+    fn deref(&self)->&Self::Target{
+        &self.value
+    }
+}
+#[test]
+fn test_deref() {
+    let value=MyValue{value:10};
+    let real_value:i32=*value;
+    println!("value :{}", real_value)
+}
+
+fn say_hello_reference(name:&String){
+    println!("Hello : {}", name)
+}
+
+#[test]
+fn test_deref_reference() {
+    let name= MyValue{
+        value:"Yogi".to_string()
+    };
+    say_hello_reference(&name.value)
+}
+
+// Drop Trait
+// Saat kita membuat value,ketika value tersebut keluar dari scope, secara otomatis value akan di drop(hapus) oleh Rust
+// Drop Trait merupakan Trait yang bisa kita implementasikan, untuk membuat code yang akan dieksekusi sebelum value di drop
+// Misal menutup koneksi, resource dan lain lain
+struct Book{
+    title:String
+}
+
+impl Drop for Book{
+    fn drop(&mut self) {
+        println!("Dropping Book:{}", self.title)
+    }
+}
+
+#[test]
+fn test_drop() {
+    let book = Book{title:"Rust".to_string()};
+    println!("{}", book.title)
+}
+
+// Multiple Ownership
+// Pada umumnya, value biasanya hanya dimiliki oleh satu variable
+// Namun, mungkin akan ada kasus dimana satu value dimiliki oleh beberapa variable, contoh  misal pada struktur data Graph, diamna satu titik bisa berasal dari beberapa titik
+// Seperti yang kita tahu, bahwa defaultnya di Rust satu value hanya bisa dimiliki oleh satu variable
+// Jika kita ingin membuat satu value bisa dimiliki oleh beberapa variable, kita harus mengguanakan type `Rc<T>` (Reference Counted)
+
+// Rc<T>
+//
+// `Rc<T>` atau Reference Counted adalah tipe data Smart Pointer yang bisa digunakan untuk lebih dari satu variable owner
+// Penggunaa `Rc<T>` mirip seperti `Box<T>`
+// https://doc.rust-lang.org/alloc/rc/
+// https://doc.rust-lang.org/stable/alloc/rc/struct.Rc.html
+use std::rc::Rc;
+
+enum Brand{
+    Of(String, Rc<Brand>),
+    End
+}
+
+#[test]
+fn test_multiple_ownership() {
+    let apple:Rc<Brand>= Rc::new(Brand::Of("Apple". to_string(), Rc::new(Brand::End)));
+    println!("Apple reference count:{}",Rc::strong_count(&apple));
+    let laptop:Brand=Brand::Of("Laptop". to_string(), Rc::clone(&apple));
+    println!("Apple reference count:{}", Rc::strong_count(&apple));
+    {
+        let smartphone:Brand=Brand::Of("Smartphone".to_string(), Rc::clone(&apple));
+        println!("Apple reference count: {}", Rc::strong_count(&apple))
+    }
+    println!("Apple reference count:{}", Rc::strong_count(&apple))
+}
+
+
+
+
+
+
 
