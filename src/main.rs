@@ -1829,6 +1829,7 @@ fn test_generic_default_value() {
 // https://doc.rust-lang.org/core/ops/index.html
 
 use core::ops::Add;
+use std::cell::RefCell;
 use std::cmp::Ordering;
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet, LinkedList, VecDeque};
 
@@ -2483,7 +2484,7 @@ impl <'a> StudentMethod<'a>{
     fn longest_name(&self, student: &StudentMethod<'a>)-> &'a str{
         if self.name.len() > student.name.len(){
             self.name
-        }else { 
+        }else {
             student.name
         }
     }
@@ -2685,9 +2686,66 @@ fn test_multiple_ownership() {
     println!("Apple reference count:{}", Rc::strong_count(&apple))
 }
 
+// Interior Mutability
+// Interior Mutability adalah design pattern dalam Rust yang memperbolehkan kita mengubah data walaupun ada reference uang immutable terhadap data tersebut
+// Sebelumnya kita tahu untuk membuat mutable reference, kita bisa gunakan &mut, namun selain itu kita juga bisa menggunakan cara lain
+// Untuk melakukan hal ini, kita bisa menggunakan type `RefCell<T>`
 
 
+// `RefCell<T>`
+// Tidak seperti `Rc<T>`, `RefCell<T>` merepresntasikan single ownership pada data yang ditunjuk, lantas apa bedanya dengan Boc<T>
+// Pada materi borrowing kita tahu bahwa pada satu waktu, tidak peerbolehkan membuat mutable reference lebih dari satu, sehingga Rust tidak akan bisa melakukan kompilasi kode program
+// dengan `RefCell<T>`, pengecekan jadi terjadi pada proses runtime(ketika program berjalan), bukan lagi ketika proses Kompilasi
+// https://doc.rust-lang.org/std/cell/struct.RefCell.html
+
+// Aturan RefCall<T>
+// Banyak immutable borrow diperbolehkan
+// Satu mutable borrow diperbolehkan
+// Banyak mutable borrow tidak diperbolehkan
+// Sekaligus mutable dan immutable borrow tidak diperbolehkan
+
+#[derive(Debug)]
+struct Seller{
+    name:RefCell<String>,
+    active:RefCell<bool>
+}
+
+#[test]
+fn test_ref_cell() {
+    let seller= Seller{
+        name:RefCell::new("Yogi".to_string()),
+        active:RefCell::new(true)
+    };
+    let mut result= seller.name.borrow_mut();
+    *result="Dwitama".to_string();
+    println!("{:?}", result)
+}
+
+// Static
+// Static adalah varaible seperti Constant
+// Cara membuat Static variable mirip seperti Constant, hanya menggunakan kata kunci static
+static  APPLICATION:&str="My Appl";
+#[test]
+fn test_static() {
+    println!("Application: {}", APPLICATION)
+}
 
 
+// Mutable Static
+// Value di constant tidak bisa diubah lagi, sedangkan pada static, kita bisa buat mutable static, yag valuenya bisa diubah
+// Namun karena static itu bisa diakses oleh siapapun, jadi ada kemungkinan tidak aman misal terjadi race condition
+// Oleh karena itu untuk mengubah mutable Static, kita wajib menggunakan unsafe block, atau unsafe function
+static mut COUNTER: u32=0;
 
+unsafe  fn increment(){
+    COUNTER+=1;
+}
 
+#[test]
+fn test_static_mut() {
+    unsafe {
+        increment();
+        COUNTER +=1;
+        println!("Counter:{}", COUNTER);
+    }
+}
